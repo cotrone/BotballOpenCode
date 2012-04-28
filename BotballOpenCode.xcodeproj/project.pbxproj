@@ -1,0 +1,123 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXGroup section */
+		657D50E0154C7E2C00891E10 = {
+			isa = PBXGroup;
+			children = (
+				657D50E9154C7E4500891E10 /* AAV */,
+				657D50EB154C7E4500891E10 /* CBC */,
+				657D50EF154C7E4500891E10 /* Create */,
+			);
+			sourceTree = "<group>";
+		};
+		657D50E9154C7E4500891E10 /* AAV */ = {
+			isa = PBXGroup;
+			children = (
+				657D50EA154C7E4500891E10 /* commonc++ */,
+			);
+			path = AAV;
+			sourceTree = "<group>";
+		};
+		657D50EA154C7E4500891E10 /* commonc++ */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = "commonc++";
+			sourceTree = "<group>";
+		};
+		657D50EB154C7E4500891E10 /* CBC */ = {
+			isa = PBXGroup;
+			children = (
+				657D50EC154C7E4500891E10 /* Navigation */,
+				657D50ED154C7E4500891E10 /* Sensor */,
+				657D50EE154C7E4500891E10 /* Servo */,
+			);
+			path = CBC;
+			sourceTree = "<group>";
+		};
+		657D50EC154C7E4500891E10 /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		657D50ED154C7E4500891E10 /* Sensor */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Sensor;
+			sourceTree = "<group>";
+		};
+		657D50EE154C7E4500891E10 /* Servo */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Servo;
+			sourceTree = "<group>";
+		};
+		657D50EF154C7E4500891E10 /* Create */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Create;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		657D50E2154C7E2C00891E10 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 657D50E5154C7E2C00891E10 /* Build configuration list for PBXProject "BotballOpenCode" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 657D50E0154C7E2C00891E10;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		657D50E7154C7E2C00891E10 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		657D50E8154C7E2C00891E10 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		657D50E5154C7E2C00891E10 /* Build configuration list for PBXProject "BotballOpenCode" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				657D50E7154C7E2C00891E10 /* Debug */,
+				657D50E8154C7E2C00891E10 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 657D50E2154C7E2C00891E10 /* Project object */;
+}
