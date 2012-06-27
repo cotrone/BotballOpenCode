@@ -1,36 +1,38 @@
 // Created on Thu Nov 17 2011
 #include <stdio.h>
-
+int analog_file_capture(int port, long wait, char description[]);
+float analog_avg(int port, int res,long latency);
+float analog_pchange(int port, int res, long wait);
 int analog_file_capture(int port, long wait, char description[])
 {
-	FILE *esv = fopen("analog_test.txt", "a");
-	long i;
-	if( esv == NULL )
-	{
-		return(-1);
-	}
-	else
-	{
-		fprintf(esv, "%s\n", description);
-		fprintf(esv, "Sensor Value\n");
-		if(wait < 10000L)
-		{
-			for(i == i; (i * 10) < wait; i++)
-			{
-				fprintf(esv, "%d\n", analog10(port));
-				msleep(10L);
-			}
-		}
-		else
-		{
-			fprintf(esv, "Error...Please Review Code\n");
-		}
-		fprintf(esv, "Termination\n");
-		fclose(esv);
-		return(0);
-	}
+    FILE *acap = fopen("analog_test.txt", "a");
+    long i;
+    if( acap == NULL )
+    {
+        return -1;
+    }
+    else
+    {
+        fprintf(acap, "%s\n", description);
+        fprintf(acap, "Sensor Value\n");
+        if(wait < 120000L)
+        {
+            for(i == i; (i * 10) < wait; i++)
+            {
+                fprintf(acap, "%d\n", analog10(port));
+                msleep(10L);
+            }
+        }
+        else
+        {
+            fprintf(acap, "\nWarining! Invalid Wait time\n");
+        }
+        fprintf(acap, "Termination\n");
+        fclose(acap);
+        return 0;
+    }
 }
-float analog_avg(int port, int res)
+float analog_avg(int port, int res,long latency)
 {
 	int i, sum;
 	sum = 0;
@@ -40,14 +42,4 @@ float analog_avg(int port, int res)
 		msleep(2L);
 	}
 	return((float)sum / (float)res);
-}
-float analog_pchange(int port, int res, long wait)
-{
-	float asa[2];
-	
-	asa[0] = analog_avg(port, res);
-	msleep(wait);
-	asa[1] = analog_avg(port, res);
-	
-	return((asa[1] - asa[0]) / asa[0]);
 }

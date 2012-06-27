@@ -1,0 +1,120 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		6557A665159AB43E007961B0 /* cbcnavlib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cbcnavlib.h; sourceTree = "<group>"; };
+		6557A667159AB43E007961B0 /* analoglib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = analoglib.h; sourceTree = "<group>"; };
+		6557A668159AB43E007961B0 /* sensorlib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sensorlib.h; sourceTree = "<group>"; };
+		6557A66A159AB43E007961B0 /* servolib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = servolib.h; sourceTree = "<group>"; };
+		6557A66C159AB43E007961B0 /* createlib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = createlib.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		6557A65A159AB41A007961B0 = {
+			isa = PBXGroup;
+			children = (
+				6557A663159AB43E007961B0 /* CBC */,
+				6557A66B159AB43E007961B0 /* Create */,
+			);
+			sourceTree = "<group>";
+		};
+		6557A663159AB43E007961B0 /* CBC */ = {
+			isa = PBXGroup;
+			children = (
+				6557A664159AB43E007961B0 /* Navigation */,
+				6557A666159AB43E007961B0 /* Sensor */,
+				6557A669159AB43E007961B0 /* Servo */,
+			);
+			path = CBC;
+			sourceTree = "<group>";
+		};
+		6557A664159AB43E007961B0 /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				6557A665159AB43E007961B0 /* cbcnavlib.h */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		6557A666159AB43E007961B0 /* Sensor */ = {
+			isa = PBXGroup;
+			children = (
+				6557A667159AB43E007961B0 /* analoglib.h */,
+				6557A668159AB43E007961B0 /* sensorlib.h */,
+			);
+			path = Sensor;
+			sourceTree = "<group>";
+		};
+		6557A669159AB43E007961B0 /* Servo */ = {
+			isa = PBXGroup;
+			children = (
+				6557A66A159AB43E007961B0 /* servolib.h */,
+			);
+			path = Servo;
+			sourceTree = "<group>";
+		};
+		6557A66B159AB43E007961B0 /* Create */ = {
+			isa = PBXGroup;
+			children = (
+				6557A66C159AB43E007961B0 /* createlib.h */,
+			);
+			path = Create;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		6557A65C159AB41A007961B0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 6557A65F159AB41A007961B0 /* Build configuration list for PBXProject "BotballOpenCode" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 6557A65A159AB41A007961B0;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		6557A661159AB41A007961B0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		6557A662159AB41A007961B0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6557A65F159AB41A007961B0 /* Build configuration list for PBXProject "BotballOpenCode" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6557A661159AB41A007961B0 /* Debug */,
+				6557A662159AB41A007961B0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6557A65C159AB41A007961B0 /* Project object */;
+}

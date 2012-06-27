@@ -3,22 +3,22 @@
 #ifndef __SENSORLIB_H__ // Change FILE to your file's name
 #define __SENSORLIB_H__
 
-typedef struct digital_properties
+struct digital_properties
 {
 	int port;
 	int def;
 	long timeout;
-} mydigital;
-typedef struct analog_properties
+};
+struct analog_properties
 {
 	int port;
 	int threshold;
 	int sigma;
 	long timeout;
-} myanalog;
+};
 
-typedef mydigital *digital_sensor;
-typedef myanalog *analog_sensor;
+typedef digital_properties *digital_sensor;
+typedef analog_properties *analog_sensor;
 digital_sensor cbcdigital[8];
 analog_sensor cbcanalog[8];
 
