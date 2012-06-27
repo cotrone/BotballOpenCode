@@ -16,7 +16,7 @@ int cbc_straight(int speed, float distance);
 //Moves the center of the CBC drivetrain in a straight line
 //Returns 1 if executed, -1 if error is detected
 
-int cbc_arc(int speed, float radius, float theta)
+int cbc_arc(int speed, float radius, float theta);
 // 0 <--> 1000 (unitless), + | - in mm, + | - in degrees
 //Moves the center of the CBC drivetrain in a constant radial arc
 //Returns 1 if executed, -1 if error is detected
