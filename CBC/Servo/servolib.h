@@ -70,6 +70,8 @@ void move_servo(servo properties, int position)
     servo_intitial_position = get_servo_position(properties->port);
     servo_tpm = properties->tpm;
     servo_latency = properties->latency;
+    servo_max = properties->max;
+    servo_min = properties->min;
     start_process(servo_thread_movement);
 }
 void servo_thread_movement()
