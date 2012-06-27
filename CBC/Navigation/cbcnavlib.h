@@ -1,113 +1,54 @@
-#ifndef CBC_NAV_H_INCLUDED
-#define CBC_NAV_H_INCLUDED
-#define PI 3.1415
-/*
-Create by Kevin Cotrone
+#ifndef __CBC_NAV_H_
+#define __CBC_NAV_H_
 
+#define PI 3.14159
 
-This a CBC nav library intended to bring
-to add a lot of basic navigation to the
-CBC and to hopefully make the CBC useful
-for a robot.
-
-Last modified: 1/22/2012
-*/
-
-struct cbcRobot
+struct CBC_robot
 {
-    int rightWheel;     //Right motor port
-    int leftWheel;      //Left motor port
-    long wheelDist;     //Distance between center of two wheels
-    long wheelDiam;     //Wheel Diameter
-    long ticksPerRight;   //1100 works for most
-    long ticksPerLeft;
-
-};
-
-struct cbcRobot robot = {0,3,118,57,1100,1100};
-
-
-long distance_to_ticks_left(long d)
-{
-	return (robot.ticksPerLeft/(robot.wheelDiam*PI))*d;
-}
-
-long distance_to_ticks_right(long d)
-{
-	return (robot.ticksPerRight/(robot.wheelDiam*PI))*d;
-}
+	float drivetrain;
+	
+	struct wheel
+	{
+		int port;
+		long ticks_cycle;
+		float speed;
+		float wheel_diameter;
+	} lwheel, rwheel;
+} cbcrobot;
 
 void wait_for_cbc()
 {
-    bmd(robot.rightWheel);
-    bmd(robot.leftWheel);
+    bmd(cbcrobot.rwheel.port);
+    bmd(cbcrobot.lwheel.port);
 }
-void cbc_straight(long dist, long speed)
+void cbc_straight(int speed, float distance)
 {
-
-    mrp(robot.rightWheel, speed, distance_to_ticks_right(dist));
-    mrp(robot.leftWheel, speed, distance_to_ticks_left(dist));
+	float lticks = distance * cbcrobot.lwheel.ticks_cycle / (cbcrobot.lwheel.wheel_diameter * PI);
+	float rticks = distance * cbcrobot.rwheel.ticks_cycle / (cbcrobot.rwheel.wheel_diameter * PI);
+	
+    mrp(cbcrobot.lwheel.port, (int)((float)speed * cbcrobot.lwheel.speed), (long)lticks);
+	mrp(cbcrobot.rwheel.port, (int)((float)speed * cbcrobot.rwheel.speed), (long)rticks);
 }
-
-//Rad and dist are in mm, and vel is in mm/sec
-void cbc_arc_right(long rad, long ang, long vel)
+void cbc_arc(int speed, float radius, float theta) // 0 <--> 1000 (unitless), + | - in mm, + | - in degrees
 {
-	long dist = ((PI/180)*ang)*rad;
-    float time = dist/vel;
-    float angle = (PI/180)*ang;
-
-    float wheelCirc = (robot.wheelDiam)*PI;
-    //Right Motor
-    long rightDist = (rad-((0.5)*robot.wheelDist))*angle;		//Radius for right wheel * radians it needs to move = right side length
-    long rightVel = distance_to_ticks_right(rightDist)/time;
-
-    //Left Motor
-    long leftDist = (rad+((0.5)*robot.wheelDist))*angle;        //Radius for left wheel * radians needed to move = left side length
-    long leftVel = distance_to_ticks_left(leftDist)/time;
-
-    mrp(robot.rightWheel, rightVel, distance_to_ticks_right(rightDist));
-    mrp(robot.leftWheel, leftVel, distance_to_ticks_left(leftDist));
-    printf("right wheel vel: %d, dist: %d, left wheel vel: %d, left wheel dist: %d \n", rightVel, rightDist, leftVel, leftDist);    //stupid debug
+	float arc_length = radius * theta * PI / 180.0;
+	float ldistance = (radius - (cbcrobot.drivetrain * 0.5)) * theta * (PI / 180.0);
+	float rdistance = (radius + (cbcrobot.drivetrain * 0.5)) * theta * (PI / 180.0);
+	float lticks = ldistance * cbcrobot.lwheel.ticks_cycle / (cbcrobot.lwheel.wheel_diameter * PI);
+	float rticks = rdistance * cbcrobot.rwheel.ticks_cycle / (cbcrobot.rwheel.wheel_diameter * PI);
+	
+	mrp(cbcrobot.lwheel.port, (int)((float)speed * cbcrobot.lwheel.speed * (ldistance / arc_length)), (long)lticks);
+	mrp(cbcrobot.rwheel.port, (int)((float)speed * cbcrobot.rwheel.speed * (rdistance / arc_length)), (long)rticks);
 }
-
-//Rad and dist are in mm, and vel is in mm/sec
-
-void cbc_arc_left(long radius, long ang, long vel)
+void cbc_spin(int speed, float theta)
 {
-    float radians = (PI/180)*ang;
-    float dist = radians*radius;
-    float time = dist/vel;
-
-    float wheelCirc = (robot.wheelDiam)*PI;
-
-    //Right motor
-    long rightDist = (radius+((0.5)*robot.wheelDist))*radians;
-    long rightVel = distance_to_ticks_right(rightDist)/time;
-
-    //Left motor
-    long leftDist = (radius-((0.5)*robot.wheelDist))*radians;
-    long leftVel = distance_to_ticks_right(leftDist)/time;
-
-    mrp(robot.leftWheel, (int)leftVel, (long)distance_to_ticks_left(leftDist));
-    mrp(robot.rightWheel, (int)rightVel, (long)distance_to_ticks_right(rightDist));
+	float rdistance = cbcrobot.drivetrain * 0.5 * theta * PI / 180.0;
+	float ldistance = rdistance * -1.0;
+	float lticks = ldistance * cbcrobot.lwheel.ticks_cycle / (cbcrobot.lwheel.wheel_diameter * PI);
+	float rticks = rdistance * cbcrobot.rwheel.ticks_cycle / (cbcrobot.rwheel.wheel_diameter * PI);
+	
+	mrp(cbcrobot.lwheel.port, (int)((float)speed * cbcrobot.lwheel.speed), (long)lticks);
+	mrp(cbcrobot.rwheel.port, (int)((float)speed * cbcrobot.rwheel.speed), (long)rticks);
 }
-
-//Spin angle in degrees and speed in mm/s
-void cbc_spin(long ang, long speed)
-{
-    float rad = ang*(PI/180);
-    long leftDist = 0;
-    long rightDist = 0;
-
-    leftDist = distance_to_ticks_left(-(robot.wheelDist/2)*rad);    //Calculate the length both wheels have to move
-    rightDist = distance_to_ticks_right((robot.wheelDist/2)*rad);   //And offset left to neg so that you actually turn 90 or
-                                                                    //Negative 90 etc.
-
-    //Move the wheels to the correct distances
-    mrp(robot.leftWheel, speed, leftDist);
-    mrp(robot.rightWheel, speed, rightDist);
-
-    printf("right wheel 1: %d, left wheel 2: %d\n", rightDist, leftDist);   //stupid debug code
-}
-
-#endif // CBC_NAV_H_INCLUDED
+	
+#endif
