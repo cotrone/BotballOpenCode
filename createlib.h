@@ -1,7 +1,5 @@
-// Code by Jeremy Rand, Amended by Norman Advanced Robotics
-// Useful Create  Functions
-#ifndef __CREATIVE_H__
-#define __CREATIVE_H__
+#ifndef __CREATELIB_H__
+#define __CREATELIB_H__
 
 #ifdef __arm__
 #define serial_write_byte create_write_byte
@@ -334,6 +332,41 @@ void create_accel_spin(int profile, float max_omega, float angle)
         sleep(interval);
     }
 }
+void create_translate(float x, float y, unsigned int speed)
+{
+    float phi = abs(atan((float)y / (float)x));
+    float theta = abs((PI / 2.0) - phi);
+    float length = sqrt((x * x + y * y) / 4.0);
+    float radius = length * sin(phi) / sin(theta);
+	phi *= (180.0 / PI);
+	theta *= (180.0 / PI);
+    if(x > 0)
+    {
+        if(y > 0)
+        {
+            create_drive_arc(speed, (int)(radius * -1.0), (int)(theta * -1.0));
+            create_drive_arc(speed, (int)radius, (int)theta);
+        }
+        if(y < 0)
+        {
+            create_drive_arc(speed, (int)(radius * -1.0), (int)theta);
+            create_drive_arc(speed, (int)radius, (int)(theta * -1.0));
+        }
+    }
+    if(x < 0)
+    {
+        if(y > 0)
+        {
+            create_drive_arc(speed, (int)radius, (int)theta);
+            create_drive_arc(speed, (int)(radius * -1.0), (int)(theta * -1.0));
+        }
+        if(y < 0)
+        {
+            create_drive_arc(speed, (int)radius, (int)(theta * -1.0));
+            create_drive_arc(speed, (int)(radius * -1.0), (int)theta);
+        }
+    }
+}
 //Create Scripting
 void script_write_byte(char byte)
 {
@@ -498,10 +531,10 @@ void script_spin_angle(unsigned int speed, int angle)
 	}
 	script_wait_theta(angle);
 }
-void script_LSD(char bits)//bits = (LSD1) + (2*LSD2) + (4*LSD3); Where LSD(N) is the state, 0 = off & 1 = On, of the 'N'th LSD
+void script_LSD(char b1, char b2, char b3)
 {
 	script_write_byte(138);
-	script_write_byte(bits);
+	script_write_byte(b1 + 2 * b2 + 4 * b3);
 }
 void script_LSDPWM(char s1, char s2, char s3)
 {
