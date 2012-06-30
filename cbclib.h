@@ -1,6 +1,9 @@
 #ifndef __CBC_NAV_H__
 #define __CBC_NAV_H__
 
+#include <stdio.h>
+#include <pthread.h>
+
 #define PI 3.14159
 float analog_avg(int port, int res,long latency);
 // 0 <--> 7 (port), + (# of trials), + in ms
@@ -39,11 +42,13 @@ struct servo_properties
 	int max;
 	int min;
 	int tpm;
+	int next_position;
+	int is_moving;
 	long latency;
-};
+}cbcservo[4];
 
 typedef struct servo_properties *servo;
-servo cbcservo[4];
+pthread_mutex_t servo_mem = PTHREAD_MUTEX_INITIALIZER;
 
 struct wheel_properties
 {
@@ -163,30 +168,31 @@ int cbc_spin(int speed, float theta)
     }
 
 }
+
 servo build_servo(int port, int min, int max, int tpm, long latency)
 {
-	cbcservo[port] = malloc(sizeof(struct servo_properties));
-	cbcservo[port]->port = port;
-	cbcservo[port]->tpm = tpm;
-	cbcservo[port]->max = max;
-	cbcservo[port]->min = min;
-	cbcservo[port]->latency = latency;
-	return(cbcservo[port]);
+	cbcservo[port].port = port;
+	cbcservo[port].tpm = tpm;
+	cbcservo[port].min = min;
+	cbcservo[port].max = max;
+	cbcservo[port].latency = latency;
+	return(&cbcservo[port]);
 }
 void rebuild_servo(servo properties, int tpm, long latency)
 {
     properties->tpm = tpm;
     properties->latency = latency;
 }
-void wait_servo(servo properties, int position)
+void *control_servo(void *ptr)
 {
+	servo properties = (struct servo_properties *) ptr;
 	int i;
 	int initial = get_servo_position(properties->port);
-	int delta = (position - initial) / properties->tpm;
+	int delta = (properties->next_position - initial) / properties->tpm;
     
-	if(properties->max >= position && properties->min <= position)
+	if(properties->max >= properties->next_position && properties->min <= properties->next_position && properties->min < properties->max)
 	{
-		if(initial < position)
+		if(initial < properties->next_position)
 		{
 			for(i = 0; i < delta; i++)
 			{
@@ -194,7 +200,7 @@ void wait_servo(servo properties, int position)
 				msleep(properties->latency);
 			}
 		}
-		if(initial > position)
+		if(initial > properties->next_position)
 		{
 			for(i = 0; i > delta; i--)
 			{
@@ -203,9 +209,26 @@ void wait_servo(servo properties, int position)
 			}
 		}
 	}
-    if(get_servo_position(properties->port) != position)
+    if(get_servo_position(properties->port) != properties->next_position)
     {
-        set_servo_position(properties->port, position);
+        set_servo_position(properties->port, properties->next_position);
     }
 }
+void wait_servo(servo properties, int position)
+{
+	properties->next_position = position;
+	control_servo((void *)properties);
+}
+void move_servo(servo properties,int position)
+{
+	int thread_num;
+	pthread_t thread_here;
+	properties->is_moving = 1;
+	properties->next_position = position;
+	if((thread_num = pthread_create( &thread_here, NULL, &control_servo, (void *)properties)))
+	{
+      printf("Threading Failure: %d\n", thread_num);
+	}
+}
 #endif
+
