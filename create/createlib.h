@@ -196,6 +196,11 @@ void create_spin(int omega)
     }
 }
 //Smart Drive Functions, Speed always positive
+void create_cease()
+{
+	create_stop();
+	create_sync();
+}
 void create_drive_arc(unsigned int speed, int radius, float angle)
 {
 	CREATE_BUSY;
@@ -214,8 +219,6 @@ void create_drive_arc(unsigned int speed, int radius, float angle)
 	serial_write_byte(get_low_byte(radius));
 	CREATE_FREE;
 	create_wait_theta(angle);
-	create_stop();
-	create_sync();
 }
 void create_drive_segment(unsigned int speed, int distance)
 {
@@ -237,8 +240,6 @@ void create_drive_segment(unsigned int speed, int distance)
 	}
 	CREATE_FREE;
 	create_wait_length(distance);
-	create_stop();
-	create_sync();
 }
 void create_spin_angle(unsigned int speed, int angle)
 {
@@ -260,8 +261,6 @@ void create_spin_angle(unsigned int speed, int angle)
 	}
 	CREATE_FREE;
 	create_wait_theta(angle);
-	create_stop();
-	create_sync();
 }
 void create_drive_touch(int rspeed, int lspeed, int rport, int lport)
 {
@@ -279,8 +278,6 @@ void create_drive_touch(int rspeed, int lspeed, int rport, int lport)
             msleep(10);
         }
     }
-	create_stop();
-    create_sync();
 }
 
 void create_drive_bump(int vel)
