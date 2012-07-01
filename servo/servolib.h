@@ -61,6 +61,7 @@ servomove build_servomove(int smart_position, int smart_tpm, long smart_latency)
 }
 void *control_servo(void *ptr_servo)
 {
+	pthread_mutex_lock(&servo_mem);
 	servo build_properties = (struct servo_properties *) ptr_servo;
 	int i;
 	int initial = get_servo_position(build_properties->port);
@@ -94,6 +95,7 @@ void *control_servo(void *ptr_servo)
 		set_servo_position(build_properties->port, build_properties->next_position);
 	}
 	build_properties->is_moving = 0;
+	pthread_mutex_unlock(&servo_mem);
 }
 void move_servo(servo build_properties,servomove move_properties)
 {
