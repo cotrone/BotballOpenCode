@@ -58,8 +58,8 @@ const int g=67;
 const int gS=68;
 
 float speed_profile[2][15] = {
-{0.112, 0.302, 0.492, 0.669, 0.805, 0.912, 0.977, 1.000, 0.977, 0.912, 0.805, 0.669, 0.492, 0.302, 0.112},
-{0.977, 0.912, 0.805, 0.669, 0.492, 0.302, 0.112, 0.000, -0.112, -0.302, -0.492, -0.669, -0.805, -0.912, -0.977},
+	{0.112, 0.302, 0.492, 0.669, 0.805, 0.912, 0.977, 1.000, 0.977, 0.912, 0.805, 0.669, 0.492, 0.302, 0.112},
+	{0.977, 0.912, 0.805, 0.669, 0.492, 0.302, 0.112, 0.000, -0.112, -0.302, -0.492, -0.669, -0.805, -0.912, -0.977},
 };
 
 int create_length(long msec)//Convert ms to 64ths
@@ -69,7 +69,7 @@ int create_length(long msec)//Convert ms to 64ths
 void create_load_onesong(int *gc_song)
 {
 	int i, length; //Counter Variables for loop iterations.
-
+	
 	CREATE_BUSY;
 	serial_write_byte(140);
 	serial_write_byte(*(gc_song++));
@@ -96,23 +96,23 @@ void create_wait_for_light()
 }
 void create_sync()
 {
-    char buffer[1];
-    char *bptr = buffer;
-
-    int read_count = 0;
-    int count = 1;
-
-    CREATE_BUSY;
-    serial_write_byte(142);
-    serial_write_byte(35);
-
-    while(read_count < count)
-    {
-        #ifdef __arm__
-        read_count += serial_read(buffer+read_count, count-read_count);
-        #endif
-    }
-    CREATE_FREE;
+	char buffer[1];
+	char *bptr = buffer;
+	
+	int read_count = 0;
+	int count = 1;
+	
+	CREATE_BUSY;
+	serial_write_byte(142);
+	serial_write_byte(35);
+	
+	while(read_count < count)
+	{
+		#ifdef __arm__
+		read_count += serial_read(buffer+read_count, count-read_count);
+		#endif
+	}
+	CREATE_FREE;
 }
 
 //Create Wait Functions
@@ -121,7 +121,7 @@ void create_wait_theta(int angle)
 	CREATE_BUSY;
 	serial_write_byte(157);
 	serial_write_byte(get_high_byte(angle));
-    serial_write_byte(get_low_byte(angle));
+	serial_write_byte(get_low_byte(angle));
 	CREATE_FREE;
 }
 void create_wait_length(int distance)
@@ -129,7 +129,7 @@ void create_wait_length(int distance)
 	CREATE_BUSY;
 	serial_write_byte(156);
 	serial_write_byte(get_high_byte(distance));
-    serial_write_byte(get_low_byte(distance));
+	serial_write_byte(get_low_byte(distance));
 	CREATE_FREE;
 }
 void create_wait_duration(int dseconds)
@@ -137,7 +137,7 @@ void create_wait_duration(int dseconds)
 	CREATE_BUSY;
 	serial_write_byte(155);
 	serial_write_byte(get_high_byte(dseconds));
-    serial_write_byte(get_low_byte(dseconds));
+	serial_write_byte(get_low_byte(dseconds));
 	CREATE_FREE;
 }
 void create_wait_sensor(int packet_id)
@@ -172,7 +172,7 @@ void create_straight(int speed)
 void create_arc(int speed, int radius)
 {
 	CREATE_BUSY;
-    serial_write_byte(137);
+	serial_write_byte(137);
 	serial_write_byte(get_high_byte(speed));
 	serial_write_byte(get_low_byte(speed));
 	serial_write_byte(get_high_byte(radius));
@@ -181,19 +181,19 @@ void create_arc(int speed, int radius)
 }
 void create_spin(int omega)
 {
-    serial_write_byte(137);
-    serial_write_byte(get_high_byte(omega));
+	serial_write_byte(137);
+	serial_write_byte(get_high_byte(omega));
 	serial_write_byte(get_low_byte(omega));
-    if(omega < 0)
-    {
-        serial_write_byte(255);
-        serial_write_byte(255);
-    }
-    if(omega > 0)
-    {
-        serial_write_byte(0);
-        serial_write_byte(1);
-    }
+	if(omega < 0)
+	{
+		serial_write_byte(255);
+		serial_write_byte(255);
+	}
+	if(omega > 0)
+	{
+		serial_write_byte(0);
+		serial_write_byte(1);
+	}
 }
 //Smart Drive Functions, Speed always positive
 void create_cease()
@@ -264,20 +264,20 @@ void create_spin_angle(unsigned int speed, int angle)
 }
 void create_drive_touch(int rspeed, int lspeed, int rport, int lport)
 {
-    create_drive_direct(rspeed, lspeed);
-    while(!digital(rport) || !digital(lport))
-    {
-        if(digital(rport))
-        {
-            create_drive_direct(0, lspeed);
-            msleep(10);
-        }
-        if(digital(lport))
-        {
-            create_drive_direct(rspeed, 0);
-            msleep(10);
-        }
-    }
+	create_drive_direct(rspeed, lspeed);
+	while(!digital(rport) || !digital(lport))
+	{
+		if(digital(rport))
+		{
+			create_drive_direct(0, lspeed);
+			msleep(10);
+		}
+		if(digital(lport))
+		{
+			create_drive_direct(rspeed, 0);
+			msleep(10);
+		}
+	}
 }
 
 void create_drive_bump(int vel)
@@ -296,74 +296,78 @@ void create_drive_bump(int vel)
 void create_accel_straight(int profile, float max_velocity, float distance)
 {
 	int i;
-    float interval;
-
-    interval = (PI * distance) / (30.0 * max_velocity);
-    for( i = 0; i < 15; i++)
-    {
-        create_straight((int)(max_velocity * speed_profile[profile][i]));
-        sleep(interval);
-    }
+	float interval;
+	
+	interval = (PI * distance) / (30.0 * max_velocity);
+	for( i = 0; i < 15; i++)
+	{
+		if(max_velocity * speed_profile[profile][i] < 50.0)
+		{
+			printf("WARNING\n%f\n", max_velocity * speed_profile[profile][i]);
+		}
+		create_straight((int)(max_velocity * speed_profile[profile][i]));
+		sleep(interval - 0.01);
+	}
 }
 void create_accel_arc(int profile, float max_velocity, float radius, float angle)
 {
 	int i;
-    float interval;
-
-    interval = (PI * angle * radius * PI) / (5400.0 * max_velocity);
-    for(i = 0; i < 15; i++)
-    {
-        create_arc((int)(max_velocity * speed_profile[profile][i]), (int)radius);
-        sleep(interval);
-    }
+	float interval;
+	
+	interval = (PI * angle * radius * PI) / (5400.0 * max_velocity);
+	for(i = 0; i < 15; i++)
+	{
+		create_arc((int)(max_velocity * speed_profile[profile][i]), (int)radius);
+		sleep(interval - 0.01);
+	}
 	
 }
 void create_accel_spin(int profile, float max_omega, float angle)
 {
 	int i;
-    float interval;
-
-    interval = (PI * angle) / (30.0 * max_omega);
-    for( i = 0; i < 15; i++)
-    {
-        create_spin((int)(max_omega * speed_profile[profile][i]));
-        sleep(interval);
-    }
+	float interval;
+	
+	interval = (PI * angle) / (30.0 * max_omega);
+	for( i = 0; i < 15; i++)
+	{
+		create_spin((int)(max_omega * speed_profile[profile][i]));
+		sleep(interval - 0.01);
+	}
 }
 void create_translate(float x, float y, unsigned int speed)
 {
-    float phi = abs(atan((float)y / (float)x));
-    float theta = abs((PI / 2.0) - phi);
-    float length = sqrt((x * x + y * y) / 4.0);
-    float radius = length * sin(phi) / sin(theta);
+	float phi = abs(atan((float)y / (float)x));
+	float theta = abs((PI / 2.0) - phi);
+	float length = sqrt((x * x + y * y) / 4.0);
+	float radius = length * sin(phi) / sin(theta);
 	phi *= (180.0 / PI);
 	theta *= (180.0 / PI);
-    if(x > 0)
-    {
-        if(y > 0)
-        {
-            create_drive_arc(speed, (int)(radius * -1.0), (int)(theta * -1.0));
-            create_drive_arc(speed, (int)radius, (int)theta);
-        }
-        if(y < 0)
-        {
-            create_drive_arc(speed, (int)(radius * -1.0), (int)theta);
-            create_drive_arc(speed, (int)radius, (int)(theta * -1.0));
-        }
-    }
-    if(x < 0)
-    {
-        if(y > 0)
-        {
-            create_drive_arc(speed, (int)radius, (int)theta);
-            create_drive_arc(speed, (int)(radius * -1.0), (int)(theta * -1.0));
-        }
-        if(y < 0)
-        {
-            create_drive_arc(speed, (int)radius, (int)(theta * -1.0));
-            create_drive_arc(speed, (int)(radius * -1.0), (int)theta);
-        }
-    }
+	if(x > 0)
+	{
+		if(y > 0)
+		{
+			create_drive_arc(speed, (int)(radius * -1.0), (int)(theta * -1.0));
+			create_drive_arc(speed, (int)radius, (int)theta);
+		}
+		if(y < 0)
+		{
+			create_drive_arc(speed, (int)(radius * -1.0), (int)theta);
+			create_drive_arc(speed, (int)radius, (int)(theta * -1.0));
+		}
+	}
+	if(x < 0)
+	{
+		if(y > 0)
+		{
+			create_drive_arc(speed, (int)radius, (int)theta);
+			create_drive_arc(speed, (int)(radius * -1.0), (int)(theta * -1.0));
+		}
+		if(y < 0)
+		{
+			create_drive_arc(speed, (int)radius, (int)(theta * -1.0));
+			create_drive_arc(speed, (int)(radius * -1.0), (int)theta);
+		}
+	}
 }
 //Create Scripting
 void script_write_byte(char byte)
@@ -379,19 +383,19 @@ void script_write_byte(char byte)
 }
 void load_script()
 {
-
+	
 	int i;
 	create_connect();
 	printf("CHECK POWER LED\n");
 	printf("If GREEN, Restart Program\n");
 	printf("If YELLOW, Restart Program\n");
 	printf("If ORANGE, Press A\n");
-
+	
 	while(a_button()) msleep(20);//wait for the a button to not be pressed to be pressed
 	while(!a_button()) msleep(20);//wait for the a button to not be pressed
-
+	
 	printf("Create connected, loading script");
-
+	
 	serial_write_byte(152);
 	serial_write_byte(create_script.length);
 	printf(".");
@@ -402,7 +406,7 @@ void load_script()
 	printf(".");
 	create_power_led(64,255);// 4 bytes
 	printf(".\n");
-    printf("Uploaded %d bytes...\nOkay to disconnect download cable!/n", create_script.length);
+	printf("Uploaded %d bytes...\nOkay to disconnect download cable!/n", create_script.length);
 }
 //Create Waits for Light Sensor, plug into create bay ports 20 and 17
 void script_wait_for_light()
@@ -536,7 +540,7 @@ void script_LSD(char b1, char b2, char b3)
 }
 void script_LSDPWM(char s1, char s2, char s3)
 {
-
+	
 	script_write_byte(144);
 	script_write_byte(s1);
 	script_write_byte(s2);

@@ -13,7 +13,8 @@ struct analog_event_properties
 {
 	int value;
 	int error;
-	float change_rate;
+	float min_change_rate;
+	float timeout;
 };
 
 typedef struct analog_sensor_properties *analog_sensor;
@@ -21,26 +22,49 @@ typedef struct analog_event_properties *analog_event;
 
 //Prototyped Functions
 analog_sensor build_analog_sensor(int port, int is_float, int trials, long refresh);
-analog_event build_analog_event(int value, int error, float change_rate);
+analog_event build_analog_event(int value, int error, float min_change_rate, float timeout);
 float analog_average(analog_sensor);
 int read_analog(analog_sensor sensor, analog_event event);
 int wait_analog(analog_sensor sensor_properties, analog_event event_properties);
 
 //Implemented Functions
-analog_sensor build_analog_sensor(int port, int is_float,int trials, long refresh)
+analog_sensor build_analog_sensor(int port, int is_float, int trials, long refresh)
 {
+	int i;
+	int mask = 0;
 	cbcanalog[port].port = port;
 	cbcanalog[port].is_float = is_float;
 	cbcanalog[port].trials = trials;
 	cbcanalog[port].refresh = refresh;
+	for(i = 0; i <= 7; i++)
+	{
+		if(cbcanalog[i].is_float == 1)
+		{
+			mask += 1 << i;
+		}
+		else if(cbcanalog[i].is_float != 0)
+		{
+			printf("Invalid set_float value for Analog: %d\nPlease set to 0 or 1\n", i);
+		}
+	
+	printf("%d   %d\n", i, mask);	
+	}
+	set_analog_floats(mask);
 	return(&cbcanalog[port]);
 }
-analog_event build_analog_event(int value, int error, float change_rate)
+analog_event build_analog_event(int value, int error, float min_change_rate, float timeout)
 {
 	analog_event this_event = malloc(sizeof(struct analog_event_properties));
-	this_event->value = value;
-	this_event->error = error;
-	this_event->change_rate = change_rate;
+	if( value - error < 0 || value + error >1024)
+	{
+		printf("Invalid Value/Error pairing\n");
+	}
+	else{
+		this_event->value = value;
+		this_event->error = error;
+		this_event->min_change_rate = min_change_rate;
+		this_event->timeout = timeout;
+	}
 	return(this_event);
 }
 float analog_average(analog_sensor sensor)
@@ -66,15 +90,14 @@ int analog_state(analog_sensor sensor, analog_event event)
 		return 0;
 	}
 }
-float analog_change(analog_sensor sensor, analog_event event)
+float analog_change_rate(analog_sensor sensor)
 {
 	float ivalue = analog_average(sensor);
 	float itime = seconds();
 	float fvalue = analog_average(sensor);
 	float ftime = seconds();
 	
-	return((fvalue - ivalue) / (ftime - itime));
+	return((fvalue - ivalue) / (1000 * (ftime - itime)));
 }
-	
-	
+
 #endif

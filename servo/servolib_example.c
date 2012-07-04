@@ -12,7 +12,7 @@ int main()
 	//It is in Port #1, Its Minimum Position is 0, Its Maximum Position is 2048
 	servo claw = build_servo(3, 300, 1500);
 	//Build a 'servo' named 'claw'
-	//It is in Port #3, Its Minimum Position is 0, Its Maximum Position is 2048
+	//It is in Port #3, Its Minimum Position is 300, Its Maximum Position is 1500
 	
 	servo_movement up = build_servo_movement(100, 15, 6);
 	//Build a 'servo_movement' named 'up'

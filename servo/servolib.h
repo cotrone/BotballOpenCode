@@ -45,11 +45,13 @@ void *control_servo(void *ptr_servo)
 {
 	pthread_mutex_lock(&servo_mem);
 	servo build_properties = (struct servo_properties *) ptr_servo;
-	int i;
+	int i, delta;
 	int initial = get_servo_position(build_properties->port);
-	int delta = (build_properties->next_position - initial) / build_properties->next_tpm;
-	
-	if(build_properties->max >= build_properties->next_position && build_properties->min <= build_properties->next_position && build_properties->min < build_properties->max)
+	if(initial == -1)
+	{
+		set_servo_position(build_properties->port, build_properties->next_position);
+	}
+	else if(build_properties->max >= build_properties->next_position && build_properties->min <= build_properties->next_position && build_properties->min < build_properties->max)
 	{
 		if(initial < build_properties->next_position)
 		{
@@ -102,6 +104,7 @@ void bsd(servo build_properties)
 }
 void wait_servo(servo build_properties, servo_movement move_properties)
 {
+	build_properties->is_moving = 1;
 	build_properties->next_position = move_properties->position;
 	build_properties->next_tpm = move_properties->tpm;
 	build_properties->next_latency = move_properties->latency;

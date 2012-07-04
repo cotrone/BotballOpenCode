@@ -1,5 +1,5 @@
-#ifndef __CBCLIB_H__
-#define __CBCLIB_H__
+#ifndef __NAVLIB_H__
+#define __NAVLIB_H__
 
 #include <stdio.h>
 
@@ -93,7 +93,7 @@ int cbc_arc(int speed, float radius, float theta) // 0 <--> 1000 (unitless), + |
 		printf("\nWarning! Invalid Speed, Please Lower\n");
 		return -1;
 	}
-	else if(radius < lwheel.radial_distance || radius < lwheel.radial_distance)
+	else if(radius < lwheel.radial_distance || radius < rwheel.radial_distance)
 	{
 		printf("\nWarning! Invalid Radius, Please Raise\n");
 		return -1;
