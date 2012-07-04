@@ -53,7 +53,7 @@ void build_rwheel(int port, long ticks_cycle, float speed_proportion, float whee
 	rwheel.wheel_diameter = wheel_diameter;
 	rwheel.radial_distance = radial_distance;
 }
-int wait_movement()
+int wait_cbc()
 {
 	bmd(rwheel.port);
 	bmd(lwheel.port);
