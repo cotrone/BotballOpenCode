@@ -13,8 +13,6 @@ struct analog_event_properties
 {
 	int value;
 	int error;
-	float min_change_rate;
-	float timeout;
 };
 
 typedef struct analog_sensor_properties *analog_sensor;
@@ -22,7 +20,7 @@ typedef struct analog_event_properties *analog_event;
 
 //Prototyped Functions
 analog_sensor build_analog_sensor(int port, int is_float, int trials, long refresh);
-analog_event build_analog_event(int value, int error, float min_change_rate, float timeout);
+analog_event build_analog_event(int value, int error);
 float analog_average(analog_sensor);
 int read_analog(analog_sensor sensor, analog_event event);
 int wait_analog(analog_sensor sensor_properties, analog_event event_properties);
@@ -46,25 +44,18 @@ analog_sensor build_analog_sensor(int port, int is_float, int trials, long refre
 		{
 			printf("Invalid set_float value for Analog: %d\nPlease set to 0 or 1\n", i);
 		}
-	
-	printf("%d   %d\n", i, mask);	
+		
+		printf("%d   %d\n", i, mask);	
 	}
 	set_analog_floats(mask);
 	return(&cbcanalog[port]);
 }
-analog_event build_analog_event(int value, int error, float min_change_rate, float timeout)
+analog_event build_analog_event(int value, int error)
 {
 	analog_event this_event = malloc(sizeof(struct analog_event_properties));
-	if( value - error < 0 || value + error >1024)
-	{
-		printf("Invalid Value/Error pairing\n");
-	}
-	else{
-		this_event->value = value;
-		this_event->error = error;
-		this_event->min_change_rate = min_change_rate;
-		this_event->timeout = timeout;
-	}
+	
+	this_event->value = value;
+	this_event->error = error;
 	return(this_event);
 }
 float analog_average(analog_sensor sensor)
