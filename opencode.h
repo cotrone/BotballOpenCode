@@ -1,6 +1,7 @@
 #ifndef __OPENCODE_H__
 #define __OPENCODE_H__
 #include "opencode/cbc/drive/drivelib.h"
+#include "opencode/cbc/light/lightstart.h"
 #include "opencode/cbc/sensor/sensorlib.h"
 #include "opencode/cbc/servo/servolib.h"
 #include "opencode/create/create_accel.h"

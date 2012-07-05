@@ -108,7 +108,7 @@ void wait_servo(servo build_properties, servo_movement move_properties)
 	build_properties->next_position = move_properties->position;
 	build_properties->next_tpm = move_properties->tpm;
 	build_properties->next_latency = move_properties->latency;
-	control_servo((void *)build_properties);
+	move_servo(build_properties, move_properties);
 	bsd(build_properties);
 }
 
