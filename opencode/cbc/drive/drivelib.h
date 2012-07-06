@@ -112,6 +112,17 @@ void cbc_stop()
 	cbc_wait();
 	cbc_halt();
 }
+int cbc_direct(int speed)
+{
+	float lspeed = (float)speed * left.wheel.speed_proportion;
+	float rspeed = (float)speed * right.wheel.speed_proportion;
+	
+	mav(left.wheel.port, (int)lspeed);
+	mav(right.wheel.port, (int)rspeed);
+	left.wheel.last_requested_speed = (int)lspeed;
+	right.wheel.last_requested_speed = (int)rspeed;
+	return 1;
+}
 int cbc_straight(int speed, float distance)
 {
 	float lticks = (distance * left.wheel.ticks_cycle) / (left.wheel.wheel_diameter * PI);
