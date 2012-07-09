@@ -1,7 +1,8 @@
-#ifndef __NAVLIB_H__
-#define __NAVLIB_H__
+#ifndef __DRIVELIB_H__
+#define __DRIVELIB_H__
 
 #include <stdio.h>
+#include <pthread.h>
 
 #define PI 3.14159
 #define DEG_TO_RAD (PI / 180.0)
@@ -54,7 +55,11 @@ struct cbc_side
 		long timeout;
 	}touch;
 }left, right;
-
+struct cbc_accel
+{
+	float x_knaught[3];
+	long timeout;
+}acceleramator;
 void build_left_wheel(int port, long ticks_cycle, float speed_proportion, float wheel_diameter, float radial_distance)
 {
 	left.wheel.port = port;
@@ -302,6 +307,41 @@ int cbc_align_black()
 		rtimeout -= 10L;
 	}
 	cbc_halt();
+}
+void *accel_bump(void *this_accel)
+{
+	struct cbc_accel *accel = (struct cbc_accel *)this_accel;
+	while(accel->timeout > 0)
+	{
+		if(accel->x_knaught[0] > (accel_x() + 0.1) || accel->x_knaught[0] < (accel_x() - 0.1))
+		{
+			cbc_halt();
+			break;
+		}
+		else if(accel->x_knaught[1] > (accel_y() + 0.1) || accel->x_knaught[2] < (accel_y() - 0.1))
+		{
+			cbc_halt();
+			break;
+		}
+		else if(accel->x_knaught[2] > (accel_z() + 0.1) || accel->x_knaught[2] < (accel_z() - 0.1))
+		{
+			cbc_halt();
+			break;
+		}
+	}	
+}
+void cbc_sense_accel()
+{
+	int thread_num;
+	pthread_t this_thread;
+	acceleramator.x_knaught[1] = accel_x();
+	acceleramator.x_knaught[2] = accel_y();
+	acceleramator.x_knaught[3] = accel_z();
+	struct cbc_accel *here = &acceleramator;
+	if((thread_num = pthread_create(&this_thread, NULL, &accel_bump, (void *)here)))
+	{
+		printf("Threading Failure: %d\n", thread_num);
+	}
 }
 #endif
 
