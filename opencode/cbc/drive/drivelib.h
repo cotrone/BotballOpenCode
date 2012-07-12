@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <pthread.h>
-
+#include "../sensor/sensorlib.h"
 #define PI 3.14159
 #define DEG_TO_RAD (PI / 180.0)
 
@@ -57,6 +57,7 @@ struct cbc_side
 }left, right;
 struct cbc_accel
 {
+	char mask;
 	float x_knaught[3];
 	long timeout;
 }acceleramator;
@@ -117,15 +118,12 @@ void cbc_stop()
 	cbc_wait();
 	cbc_halt();
 }
-int cbc_direct(int speed)
+int cbc_direct(int lspeed, int rspeed)
 {
-	float lspeed = (float)speed * left.wheel.speed_proportion;
-	float rspeed = (float)speed * right.wheel.speed_proportion;
-	
-	mav(left.wheel.port, (int)lspeed);
-	mav(right.wheel.port, (int)rspeed);
-	left.wheel.last_requested_speed = (int)lspeed;
-	right.wheel.last_requested_speed = (int)rspeed;
+	mav(left.wheel.port, lspeed);
+	mav(right.wheel.port,rspeed);
+	left.wheel.last_requested_speed = lspeed;
+	right.wheel.last_requested_speed = rspeed;
 	return 1;
 }
 int cbc_straight(int speed, float distance)
@@ -209,30 +207,32 @@ int cbc_align_touch()
 {
 	long ltimeout = left.touch.timeout;
 	long rtimeout = right.touch.timeout;
-	while(ltimeout > 0 || rtimeout > 0)
+	while(ltimeout > 0 && rtimeout > 0 && !digital(left.tophat.port) && !digital(right.tophat.port))
 	{
-		if(digital(left.touch.port) == 1 && digital(right.touch.port) == 0)
+		
+		ltimeout -= 10L;
+		rtimeout -= 10L;
+	}
+	cbc_halt();
+} 
+int cbc_align_black()
+{
+	long ltimeout = left.tophat.timeout;
+	long rtimeout = right.tophat.timeout;
+	set_analog_floats(0);
+	mav(left.wheel.port, left.wheel.last_requested_speed);
+	mav(right.wheel.port, right.wheel.last_requested_speed);
+	while(ltimeout > 0 && rtimeout > 0 && (analog10(left.tophat.port) < (left.tophat.white + left.tophat.error) || analog10(right.tophat.port) < (right.tophat.white + right.tophat.error)))
+	{
+		if(analog10(left.tophat.port) > (left.tophat.black - left.tophat.error))
 		{
-			mav(left.wheel.port, left.wheel.last_requested_speed / 10);
-			mav(right.wheel.port, right.wheel.last_requested_speed);
-			msleep(10L);
+			off(left.wheel.port);
 		}
-		else if(digital(left.touch.port) == 0 && digital(right.touch.port) == 1)
+		if(analog10(right.tophat.port) > (right.tophat.black - right.tophat.error))
 		{
-			mav(left.wheel.port, left.wheel.last_requested_speed);
-			mav(right.wheel.port, right.wheel.last_requested_speed / 10);
-			msleep(10L);
+			off(right.wheel.port);
 		}
-		else if(digital(left.touch.port) == 0 && digital(right.touch.port) == 0)
-		{
-			mav(left.wheel.port, left.wheel.last_requested_speed);
-			mav(right.wheel.port, right.wheel.last_requested_speed);
-			msleep(10L);
-		}
-		else if(digital(left.touch.port) == 1 && digital(right.touch.port) == 1)
-		{
-			break;
-		}
+		msleep(10L);
 		ltimeout -= 10L;
 		rtimeout -= 10L;
 	}
@@ -240,69 +240,22 @@ int cbc_align_touch()
 }
 int cbc_align_white()
 {
-	int mask = (1 << left.tophat.port) + (1 << right.tophat.port);
-	long ltimeout = left.touch.timeout;
-	long rtimeout = right.touch.timeout;
-	set_analog_floats(mask);
-	while(ltimeout > 0 || rtimeout > 0)
+	long ltimeout = left.tophat.timeout;
+	long rtimeout = right.tophat.timeout;
+	set_analog_floats(0);
+	mav(left.wheel.port, left.wheel.last_requested_speed);
+	mav(right.wheel.port, right.wheel.last_requested_speed);
+	while(ltimeout > 0 && rtimeout > 0 && (analog10(left.tophat.port) > (left.tophat.black - left.tophat.error) || analog10(right.tophat.port) > (right.tophat.black - right.tophat.error)))
 	{
-		if(analog10(left.tophat.port) < (left.tophat.white + left.tophat.error) && analog10(right.tophat.port) > (right.tophat.white + right.tophat.error))
+		if(analog10(left.tophat.port) < (left.tophat.white + left.tophat.error))
 		{
-			mav(left.wheel.port, 0);
-			mav(right.wheel.port, right.wheel.last_requested_speed);
-			msleep(10L);
+			off(left.wheel.port);
 		}
-		else if(analog10(left.tophat.port) > (left.tophat.white + left.tophat.error) && analog10(right.tophat.port) < (right.tophat.white + right.tophat.error))
+		if(analog10(right.tophat.port) < (right.tophat.white + right.tophat.error))
 		{
-			mav(left.wheel.port, left.wheel.last_requested_speed);
-			mav(right.wheel.port, 0);
-			msleep(10L);
+			off(right.wheel.port);
 		}
-		else if(analog10(left.tophat.port) > (left.tophat.white + left.tophat.error) && analog10(right.tophat.port) > (right.tophat.white + right.tophat.error))
-		{
-			mav(left.wheel.port, left.wheel.last_requested_speed);
-			mav(right.wheel.port, right.wheel.last_requested_speed);
-			msleep(10L);
-		}
-		else if(analog10(left.tophat.port) > (left.tophat.white + left.tophat.error) && analog10(right.tophat.port) > (right.tophat.white + right.tophat.error))
-		{
-			break;
-		}
-		ltimeout -= 10L;
-		rtimeout -= 10L;
-	}
-	cbc_halt();
-}
-int cbc_align_black()
-{
-	int mask = (1 << left.tophat.port) + (1 << right.tophat.port);
-	long ltimeout = left.touch.timeout;
-	long rtimeout = right.touch.timeout;
-	set_analog_floats(mask);
-	while(ltimeout > 0 || rtimeout > 0)
-	{
-		if(analog10(left.tophat.port) > (left.tophat.black - left.tophat.error) && analog10(right.tophat.port) < (right.tophat.black - right.tophat.error))
-		{
-			mav(left.wheel.port, 0);
-			mav(right.wheel.port, right.wheel.last_requested_speed);
-			msleep(10L);
-		}
-		else if(analog10(left.tophat.port) < (left.tophat.black - left.tophat.error) && analog10(right.tophat.port) > (right.tophat.black - right.tophat.error))
-		{
-			mav(left.wheel.port, left.wheel.last_requested_speed);
-			mav(right.wheel.port, 0);
-			msleep(10L);
-		}
-		else if(analog10(left.tophat.port) < (left.tophat.black - left.tophat.error) && analog10(right.tophat.port) < (right.tophat.black - right.tophat.error))
-		{
-			mav(left.wheel.port, left.wheel.last_requested_speed);
-			mav(right.wheel.port, right.wheel.last_requested_speed);
-			msleep(10L);
-		}
-		else if(analog10(left.tophat.port) > (left.tophat.black - left.tophat.error) && analog10(right.tophat.port) > (right.tophat.black - right.tophat.error))
-		{
-			break;
-		}
+		msleep(10L);
 		ltimeout -= 10L;
 		rtimeout -= 10L;
 	}
@@ -313,17 +266,17 @@ void *accel_bump(void *this_accel)
 	struct cbc_accel *accel = (struct cbc_accel *)this_accel;
 	while(accel->timeout > 0)
 	{
-		if(accel->x_knaught[0] > (accel_x() + 0.1) || accel->x_knaught[0] < (accel_x() - 0.1))
+		if((accel->x_knaught[0] > (accel_x() + 0.1) || accel->x_knaught[0] < (accel_x() - 0.1)) && accel->mask & 1 == 1)
 		{
 			cbc_halt();
 			break;
 		}
-		else if(accel->x_knaught[1] > (accel_y() + 0.1) || accel->x_knaught[2] < (accel_y() - 0.1))
+		else if((accel->x_knaught[1] > (accel_y() + 0.1) || accel->x_knaught[2] < (accel_y() - 0.1)) && accel->mask & 2 == 2)
 		{
 			cbc_halt();
 			break;
 		}
-		else if(accel->x_knaught[2] > (accel_z() + 0.1) || accel->x_knaught[2] < (accel_z() - 0.1))
+		else if((accel->x_knaught[2] > (accel_z() + 0.1) || accel->x_knaught[2] < (accel_z() - 0.1)) && accel->mask & 4 == 4)
 		{
 			cbc_halt();
 			break;

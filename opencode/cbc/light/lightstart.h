@@ -9,7 +9,7 @@ pthread_mutex_t kill_mem = PTHREAD_MUTEX_INITIALIZER;
 struct run_table
 {
 	pthread_t thread_id;
-	float process_kill_time;
+	float process_kill_time, start_process_time;
 };
 void kill_servos()
 {
@@ -24,6 +24,7 @@ void *wait_to_kill(void *process_prop)
 	struct run_table *killer = (struct run_table *) process_prop;
 	sleep(killer->process_kill_time);
 	pthread_kill(killer->thread_id, 1);
+	printf("/nProgram Killed After %.2f seconds", seconds() - killer->start_process_time);
 	process_prop = NULL;
 	pthread_mutex_unlock(&kill_mem);
 	pthread_exit(process_prop);
@@ -40,13 +41,13 @@ void lightstart(int port, float kill_time)
 	main_process_attributes->thread_id = pthread_self();
 	
 	set_analog_floats(0);
-	printf("A Button :\tProceed to Calibration\n");
+	printf("A Button :\tCalibrate for Light Start in Port #%d\n", port);
 	printf("B Button :\tRun Now!\n");
 	while(1)
 	{
 		if(a_button())
 		{
-			printf("\nTurn Light On and Off\n");
+			printf("\nPlease Turn Light On and Off\n");
 			while(light_on == -1 || light_off == -1)
 			{
 				if(analog10(port) > 512 && light_off == -1)
@@ -58,7 +59,7 @@ void lightstart(int port, float kill_time)
 						for(i = 0; i < 3; i++)
 						{
 							light_off += analog10(port);
-							msleep(10L);
+							msleep(250L);
 						}
 						light_off = light_off / 3;
 						if(light_off < 512)
@@ -77,7 +78,7 @@ void lightstart(int port, float kill_time)
 						for(i = 0; i < 3; i++)
 						{
 							light_on += analog10(port);
-							msleep(10L);
+							msleep(250L);
 						}
 						light_on = light_on / 3;
 						if(light_on > 512)
@@ -119,7 +120,8 @@ void lightstart(int port, float kill_time)
 		}
 		msleep(10L);
 	}
-	printf("Program Running!\nSee you in %.2f seconds!\n", kill_time);
+	printf("Program Running!\nEnding in %.2f seconds!\n", kill_time);
+	main_process_attributes->start_process_time = seconds();
 	pthread_create(&kill_thread, NULL, wait_to_kill, (void *)main_process_attributes);
 }
 #endif
