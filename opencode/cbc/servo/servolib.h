@@ -8,11 +8,11 @@ struct servo_properties
 	int port;
 	int max;
 	int min;
-	int next_tpm;
-	int next_position;
 	int is_moving;
+    int connect_mask;
 	pthread_t process_id;
 	long next_latency;
+    struct servo_movement *next_movement;
 }cbcservo[4];
 
 struct servo_movement
@@ -47,6 +47,7 @@ void *control_servo(void *ptr_servo)
 	servo build_properties = (struct servo_properties *) ptr_servo;
 	int i, delta;
 	int initial = get_servo_position(build_properties->port);
+    delta = (build_properties->next_position - initial) / build_properties->next_tpm;
 	if(initial == -1)
 	{
 		set_servo_position(build_properties->port, build_properties->next_position);
@@ -83,20 +84,42 @@ void *control_servo(void *ptr_servo)
 }
 void move_servo(servo build_properties,servo_movement move_properties)
 {
-	int thread_num;
+	int thread_num, i;
 	pthread_t this_thread;
 	build_properties->is_moving = 1;
 	build_properties->next_position = move_properties->position;
 	build_properties->next_tpm = move_properties->tpm;
 	build_properties->next_latency = move_properties->latency;
-	if((thread_num = pthread_create(&this_thread, NULL, &control_servo, (void *)build_properties)))
-	{
-		printf("Threading Failure: %d\n", thread_num);
-	}
-	else
-	{
-		build_properties->process_id = this_thread;
-	}
+    if(build_properties->connect_mask & (1 << build_properties->port) == (1 << build_properties->port))
+    {
+        if((thread_num = pthread_create(&this_thread, NULL, &control_servo, (void *)build_properties)))
+        {
+            printf("Threading Failure: %d\n", thread_num);
+        }
+        else
+        {
+            build_properties->process_id = this_thread;
+        }
+    }
+    else
+    {
+        for(i = 0; i <= 3; i++)
+        {
+            if(build_properties->connect_mask & (1 << i) == (1 << i))
+            {
+                get_servo_position(i)
+                if((thread_num = pthread_create(&this_thread, NULL, &control_servo, (void *)build_properties)))
+                {
+                    printf("Threading Failure: %d\n", thread_num);
+                }
+                else
+                {
+                    build_properties->process_id = this_thread;
+                }
+
+            }
+        }
+    }
 }
 void bsd(servo build_properties)
 {
@@ -105,11 +128,13 @@ void bsd(servo build_properties)
 void wait_servo(servo build_properties, servo_movement move_properties)
 {
 	build_properties->is_moving = 1;
-	build_properties->next_position = move_properties->position;
-	build_properties->next_tpm = move_properties->tpm;
-	build_properties->next_latency = move_properties->latency;
-	move_servo(build_properties, move_properties);
-	bsd(build_properties);
+	build_properties->next_movement = move_properties;
+    move_servo(build_properties, move_properties);
+    bsd(build_properties);
+}
+void connect_servos(servo default_servo, servo_movement default_movemnet, servo other_servo, servo_movement other_movemnet)
+{
+    default
 }
 void kill_servos()
 {

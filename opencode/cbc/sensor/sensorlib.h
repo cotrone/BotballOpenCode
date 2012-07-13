@@ -6,8 +6,6 @@ struct analog_sensor_properties
 {
 	int port;
 	int is_float;
-	int trials;
-	long refresh;
 } cbcanalog[8];
 struct analog_event_properties
 {
@@ -19,21 +17,19 @@ typedef struct analog_sensor_properties *analog_sensor;
 typedef struct analog_event_properties *analog_event;
 
 //Prototyped Functions
-analog_sensor build_analog_sensor(int port, int is_float, int trials, long refresh);
+analog_sensor build_analog_sensor(int port, int is_float);
 analog_event build_analog_event(int value, int error);
 float analog_average(analog_sensor);
 int read_analog(analog_sensor sensor, analog_event event);
 int wait_analog(analog_sensor sensor_properties, analog_event event_properties);
 
 //Implemented Functions
-analog_sensor build_analog_sensor(int port, int is_float, int trials, long refresh)
+analog_sensor build_analog_sensor(int port, int is_float)
 {
 	int i;
 	int mask = 0;
 	cbcanalog[port].port = port;
 	cbcanalog[port].is_float = is_float;
-	cbcanalog[port].trials = trials;
-	cbcanalog[port].refresh = refresh;
 	for(i = 0; i <= 7; i++)
 	{
 		if(cbcanalog[i].is_float == 1)
@@ -58,16 +54,16 @@ analog_event build_analog_event(int value, int error)
 	this_event->error = error;
 	return(this_event);
 }
-float analog_average(analog_sensor sensor)
+float analog_average(analog_sensor sensor, int trials, long refresh)
 {
 	int i;
 	float sum = 0.0;
-	for(i = 0; i < sensor->trials; i++)
+	for(i = 0; i < trials; i++)
 	{
 		sum += (float)analog10(sensor->port);
-		msleep(sensor->refresh);
+		msleep(refresh);
 	}
-	return(sum / sensor->trials);
+	return(sum / (float)trials);
 }
 int analog_state(analog_sensor sensor, analog_event event)
 {
@@ -81,14 +77,15 @@ int analog_state(analog_sensor sensor, analog_event event)
 		return 0;
 	}
 }
-float analog_change_rate(analog_sensor sensor)
+float analog_change_rate(analog_sensor sensor, int trials, int refresh)
 {
-	float ivalue = analog_average(sensor);
-	float itime = seconds();
-	float fvalue = analog_average(sensor);
-	float ftime = seconds();
+    float val[2], time[2];
+	val[0] = analog_average(sensor, trials, refresh);
+	time[0] = seconds();
+	val[1] = analog_average(sensor, trials, refresh)
+	time[1] = seconds();
 	
-	return((fvalue - ivalue) / (1000 * (ftime - itime)));
+	return((val[1] - val[1]) / (1000.0 * (time[1] - time[0])));
 }
 
 #endif
