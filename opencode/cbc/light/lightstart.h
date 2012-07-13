@@ -11,13 +11,6 @@ struct run_table
 	pthread_t thread_id;
 	float process_kill_time, start_process_time;
 };
-void kill_servos()
-{
-	pthread_kill(cbcservo[0].process_id, 1);
-	pthread_kill(cbcservo[1].process_id, 1);
-	pthread_kill(cbcservo[2].process_id, 1);
-	pthread_kill(cbcservo[3].process_id, 1);
-}
 void *wait_to_kill(void *process_prop)
 {
 	pthread_mutex_trylock(&kill_mem);

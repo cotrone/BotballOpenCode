@@ -111,5 +111,11 @@ void wait_servo(servo build_properties, servo_movement move_properties)
 	move_servo(build_properties, move_properties);
 	bsd(build_properties);
 }
-
+void kill_servos()
+{
+	pthread_kill(cbcservo[0].process_id, 1);
+	pthread_kill(cbcservo[1].process_id, 1);
+	pthread_kill(cbcservo[2].process_id, 1);
+	pthread_kill(cbcservo[3].process_id, 1);
+}
 #endif
